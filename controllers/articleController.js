@@ -1,4 +1,6 @@
-// import models here later
+const User = require("../models/user");
+const Article = require("../models/article");
+const Comment = require("../models/comment");
 
 //////////////////// Article List (all articles) //////////////////////////////
 // Public

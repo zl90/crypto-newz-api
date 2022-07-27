@@ -5,6 +5,9 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const dotenv = require("dotenv/config");
 const mongoose = require("mongoose");
+require("./passport");
+const LocalStrategy = require("passport-local").Strategy;
+const bodyParser = require("body-parser");
 
 var indexRouter = require("./routes/index");
 var articlesRouter = require("./routes/articles");
@@ -24,6 +27,8 @@ app.set("view engine", "pug");
 /// Middleware
 app.use(logger("dev"));
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
