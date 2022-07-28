@@ -111,7 +111,49 @@ exports.article_get = function (req, res, next) {
 // Admin only
 exports.article_put = function (req, res, next) {
   // Updates the specified article with a new one
-  res.json({ message: "NOT IMPLEMENTED: article id PUT" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to update the article
+    Article.findOne({ _id: req.params.articleId }).exec((err, articleFound) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!articleFound) {
+        // Article doesn't exist, report error to user
+        return res.status(404).json({ message: "Article not found" });
+      } else {
+        // Success, update the new article with the one in the request body:
+        const newArticle = new Article({
+          title: req.body.title,
+          published_at: Date.parse(req.body.published_at),
+          url: req.body.url,
+          source: req.body.source,
+          comments: req.body.comments,
+          _id: req.params.articleId,
+        });
+
+        Article.findByIdAndUpdate(
+          req.params.articleId,
+          newArticle,
+          {},
+          (update_errors, updated_article) => {
+            if (update_errors) {
+              return next(update_errors);
+            }
+
+            res.json({ message: "Successfully updated the article" });
+          }
+        );
+      }
+    });
+  })(req, res);
 };
 // Admin only
 exports.article_delete = function (req, res, next) {
