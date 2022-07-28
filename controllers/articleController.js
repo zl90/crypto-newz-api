@@ -7,12 +7,20 @@ const passport = require("passport");
 // Public
 exports.articles_get = function (req, res, next) {
   // Gets the article list
-  res.json({ message: "NOT IMPLEMENTED: article list GET" });
+  Article.find().exec((err, articleList) => {
+    if (err) {
+      return next(err);
+    }
+
+    // Success, respond with the article list
+    return res.json(articleList);
+  });
 };
 
 // Admin only
+// Adds a new article to the list
 exports.articles_post = function (req, res, next) {
-  // Adds a new article to the list
+  // Authenticate request
   passport.authenticate("jwt", { session: false }, (err, user) => {
     if (err || !user) {
       return res.status(401).json({
@@ -22,7 +30,6 @@ exports.articles_post = function (req, res, next) {
     }
 
     // Admin authenticated: proceed to add new article to the list
-
     const newArticle = new Article({
       title: req.body.title,
       published_at: Date.parse(req.body.published_at),
