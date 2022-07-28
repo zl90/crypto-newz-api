@@ -299,7 +299,35 @@ exports.comments_delete = function (req, res, next) {
 // Public
 exports.comment_get = function (req, res, next) {
   // Gets the specified comment on the specified article
-  res.json({ message: "NOT IMPLEMENTED: comment id GET" });
+  Article.findOne({ _id: req.params.articleId })
+    .populate("comments")
+    .exec((err, articleFound) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!articleFound) {
+        // Article doesn't exist, report error to user
+        return res.status(404).json({ message: "Article not found" });
+      } else {
+        // Success, search for the comment:
+        Comment.findOne({ _id: req.params.commentId }).exec(
+          (err, commentFound) => {
+            if (err) {
+              return next(err);
+            }
+
+            if (!commentFound) {
+              // comment doesn't exist, report error to user
+              return res.status(404).json({ message: "Comment not found" });
+            } else {
+              // success, respond with the comment
+              return res.json(commentFound);
+            }
+          }
+        );
+      }
+    });
 };
 
 // Admin only
