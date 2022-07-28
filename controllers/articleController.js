@@ -2,6 +2,7 @@ const User = require("../models/user");
 const Article = require("../models/article");
 const Comment = require("../models/comment");
 const passport = require("passport");
+const article = require("../models/article");
 
 //////////////////// Article List (all articles) //////////////////////////////
 // Public
@@ -212,7 +213,41 @@ exports.comments_get = function (req, res, next) {
 // Public
 exports.comments_post = function (req, res, next) {
   // Adds a new comment to the specified article
-  res.json({ message: "NOT IMPLEMENTED: comment list POST" });
+  Article.findOne({ _id: req.params.articleId })
+    .populate("comments")
+    .exec((err, articleFound) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!articleFound) {
+        // Article doesn't exist, report error to user
+        return res.status(404).json({ message: "Article not found" });
+      } else {
+        // Article found, create the new comment object:
+        const newComment = new Comment({
+          name: req.body.name,
+          content: req.body.content,
+        });
+
+        // save the new comment to the db
+        newComment.save((err) => {
+          if (err) {
+            return next(err);
+          }
+        });
+
+        // Append the new comment to the article
+        articleFound.comments.push(newComment);
+        articleFound.save((err) => {
+          if (err) {
+            return next(err);
+          }
+        });
+
+        res.json({ message: "Successfully added new comment" });
+      }
+    });
 };
 
 // Admin only
