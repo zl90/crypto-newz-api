@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const Article = require("../models/article");
 const Comment = require("../models/comment");
+const passport = require("passport");
 
 //////////////////// Article List (all articles) //////////////////////////////
 // Public
@@ -12,17 +13,88 @@ exports.articles_get = function (req, res, next) {
 // Admin only
 exports.articles_post = function (req, res, next) {
   // Adds a new article to the list
-  res.json({ message: "NOT IMPLEMENTED: article list POST" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to add new article to the list
+
+    const newArticle = new Article({
+      title: req.body.title,
+      published_at: Date.parse(req.body.published_at),
+      url: req.body.url,
+      source: req.body.source,
+      comments: req.body.comments,
+    });
+
+    // Check for duplicate article names in the db
+    Article.findOne({ title: newArticle.title }).exec((err, foundDuplicate) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (foundDuplicate) {
+        // Article is already in the list, don't add it
+        return res
+          .status(403)
+          .json({ message: "Article already exists in the database" });
+      } else {
+        // Add the article to the db
+        newArticle.save((err) => {
+          if (err) {
+            return next(err);
+          }
+
+          return res.json({
+            message: "Successfully added the article to the database",
+          });
+        });
+      }
+    });
+  })(req, res);
 };
 // Admin only
 exports.articles_put = function (req, res, next) {
   // Updates the article list with a new one
-  res.json({ message: "NOT IMPLEMENTED: article list PUT" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to update article list
+
+    // todo
+
+    return res.json({ message: "Successfully updated articles", user: user });
+  })(req, res);
 };
 // Admin only
 exports.articles_delete = function (req, res, next) {
   // Deletes all articles
-  res.json({ message: "NOT IMPLEMENTED: article list DELETE" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to delete article list
+
+    // todo
+
+    return res.json({
+      message: "Successfully deleted all articles",
+      user: user,
+    });
+  })(req, res);
 };
 
 //////////////////////////// Individual Articles //////////////////////////////

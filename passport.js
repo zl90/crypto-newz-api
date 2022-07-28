@@ -6,7 +6,7 @@ const extractJWT = require("passport-jwt").ExtractJwt;
 
 const User = require("./models/user");
 
-// passport setup
+// Logs the user in, using local strategy
 passport.use(
   new LocalStrategy((username, password, done) => {
     User.findOne({ username }, (err, user) => {
@@ -22,6 +22,7 @@ passport.use(
   })
 );
 
+// Authenticates requests for protected resources
 passport.use(
   new JWTStrategy(
     {
