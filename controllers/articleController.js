@@ -252,7 +252,47 @@ exports.comments_post = function (req, res, next) {
 // Admin only
 exports.comments_delete = function (req, res, next) {
   // Deletes all comments on the specified article
-  res.json({ message: "NOT IMPLEMENTED: comment list DELETE" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to delete comment list
+    Article.findOne({ _id: req.params.articleId })
+      .populate("comments")
+      .exec((err, articleFound) => {
+        if (err) {
+          return next(err);
+        }
+
+        if (!articleFound) {
+          // Article doesn't exist, report error to user
+          return res.status(404).json({ message: "Article not found" });
+        } else {
+          // Article found, delete each comment object from the db:
+          for (let i = 0; i < articleFound.comments.length; i++) {
+            Comment.findByIdAndRemove(articleFound.comments[i]._id, (err) => {
+              if (err) {
+                return next(err);
+              }
+            });
+          }
+
+          // Delete references to comments from the article
+          articleFound.comments = [];
+          articleFound.save((err) => {
+            if (err) {
+              return next(err);
+            }
+          });
+
+          res.json({ message: "Successfully deleted all comments" });
+        }
+      });
+  })(req, res);
 };
 
 /////////////////////////////// Individual comment ////////////////////////////
