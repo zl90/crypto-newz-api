@@ -76,13 +76,16 @@ exports.articles_delete = function (req, res, next) {
     }
 
     // Admin authenticated: proceed to delete article list
-
-    // todo
-
-    return res.json({
-      message: "Successfully deleted all articles",
-      user: user,
-    });
+    Article.deleteMany()
+      .then(() => {
+        return res.json({
+          message: "Successfully deleted all articles",
+          user: user,
+        });
+      })
+      .catch((err) => {
+        return next(err);
+      });
   })(req, res);
 };
 
