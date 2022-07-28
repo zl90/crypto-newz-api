@@ -158,7 +158,35 @@ exports.article_put = function (req, res, next) {
 // Admin only
 exports.article_delete = function (req, res, next) {
   // Deletes the specified article
-  res.json({ message: "NOT IMPLEMENTED: article id DELETE" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to delete the article
+    Article.findOne({ _id: req.params.articleId }).exec((err, articleFound) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!articleFound) {
+        // Article doesn't exist, report error to user
+        return res.status(404).json({ message: "Article not found" });
+      } else {
+        // Found the article, delete it
+        Article.findByIdAndRemove(req.params.articleId, (err) => {
+          if (err) {
+            return next(err);
+          }
+
+          res.json({ message: "Successfully deleted the article" });
+        });
+      }
+    });
+  })(req, res);
 };
 
 ///////////// Comment list (all comments on a particular article) /////////////
