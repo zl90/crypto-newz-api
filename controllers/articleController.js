@@ -249,12 +249,6 @@ exports.comments_post = function (req, res, next) {
       }
     });
 };
-
-// Admin only
-exports.comments_put = function (req, res, next) {
-  // Updates all comments on the specified article
-  res.json({ message: "NOT IMPLEMENTED: comment list PUT" });
-};
 // Admin only
 exports.comments_delete = function (req, res, next) {
   // Deletes all comments on the specified article

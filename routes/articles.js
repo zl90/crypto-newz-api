@@ -15,7 +15,6 @@ router.delete("/:articleId", articleController.article_delete);
 ////////////////////////////// Comment List ///////////////////////////////////
 router.get("/:articleId/comments", articleController.comments_get);
 router.post("/:articleId/comments", articleController.comments_post);
-router.put("/:articleId/comments", articleController.comments_put);
 router.delete("/:articleId/comments", articleController.comments_delete);
 
 /////////////////////////// Individual Comments ///////////////////////////////
