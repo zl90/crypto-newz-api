@@ -193,7 +193,21 @@ exports.article_delete = function (req, res, next) {
 // Public
 exports.comments_get = function (req, res, next) {
   // Gets all comments on the specified article
-  res.json({ message: "NOT IMPLEMENTED: comment list GET" });
+  Article.findOne({ _id: req.params.articleId })
+    .populate("comments")
+    .exec((err, articleFound) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!articleFound) {
+        // Article doesn't exist, report error to user
+        return res.status(404).json({ message: "Article not found" });
+      } else {
+        // Success, respond with the article's comment list:
+        return res.json(articleFound.comments);
+      }
+    });
 };
 // Public
 exports.comments_post = function (req, res, next) {
