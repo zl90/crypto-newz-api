@@ -341,7 +341,7 @@ exports.comment_put = function (req, res, next) {
       });
     }
 
-    // Admin authenticated: proceed to update the article
+    // Admin authenticated: proceed to find the article
     Article.findOne({ _id: req.params.articleId }).exec((err, articleFound) => {
       if (err) {
         return next(err);
@@ -391,5 +391,57 @@ exports.comment_put = function (req, res, next) {
 // Admin only
 exports.comment_delete = function (req, res, next) {
   // Deletes the specified comment on the specified article
-  res.json({ message: "NOT IMPLEMENTED: comment id DELETE" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to find the article
+    Article.findOne({ _id: req.params.articleId }).exec((err, articleFound) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!articleFound) {
+        // Article doesn't exist, report error to user
+        return res.status(404).json({ message: "Article not found" });
+      } else {
+        // Article found, now look for the comment:
+        Comment.findOne({ _id: req.params.commentId }).exec(
+          (err, commentFound) => {
+            if (err) {
+              return next(err);
+            }
+
+            if (!commentFound) {
+              // comment doesn't exist, report error to user
+              return res.status(404).json({ message: "Comment not found" });
+            } else {
+              // success, delete the comment from the db
+              Comment.findByIdAndRemove(req.params.commentId, (err) => {
+                if (err) {
+                  return next(err);
+                }
+              });
+
+              // Remove the comment reference from the article
+              articleFound.comments = articleFound.comments.filter((item) => {
+                return item._id.toString() !== commentFound._id.toString();
+              });
+              articleFound.save((err) => {
+                if (err) {
+                  return next(err);
+                }
+              });
+
+              return res.json({ message: "Successfully deleted the comment" });
+            }
+          }
+        );
+      }
+    });
+  })(req, res);
 };
