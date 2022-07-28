@@ -5,7 +5,6 @@ const articleController = require("../controllers/articleController");
 ////////////////////////////// Article List ///////////////////////////////////
 router.get("/", articleController.articles_get);
 router.post("/", articleController.articles_post);
-router.put("/", articleController.articles_put);
 router.delete("/", articleController.articles_delete);
 
 /////////////////////////// Individual Article ////////////////////////////////

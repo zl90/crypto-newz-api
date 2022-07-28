@@ -65,24 +65,6 @@ exports.articles_post = function (req, res, next) {
   })(req, res);
 };
 // Admin only
-exports.articles_put = function (req, res, next) {
-  // Updates the article list with a new one
-  passport.authenticate("jwt", { session: false }, (err, user) => {
-    if (err || !user) {
-      return res.status(401).json({
-        message: "Bad auth: Admin only",
-        user,
-      });
-    }
-
-    // Admin authenticated: proceed to update article list
-
-    // todo
-
-    return res.json({ message: "Successfully updated articles", user: user });
-  })(req, res);
-};
-// Admin only
 exports.articles_delete = function (req, res, next) {
   // Deletes all articles
   passport.authenticate("jwt", { session: false }, (err, user) => {
