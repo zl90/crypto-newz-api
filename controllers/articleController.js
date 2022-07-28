@@ -92,7 +92,20 @@ exports.articles_delete = function (req, res, next) {
 //////////////////////////// Individual Articles //////////////////////////////
 // Public
 exports.article_get = function (req, res, next) {
-  res.json({ message: "NOT IMPLEMENTED: article id GET" });
+  // Gets an individual article
+  Article.findOne({ _id: req.params.articleId }).exec((err, articleFound) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!articleFound) {
+      // Article doesn't exist, report error to user
+      return res.status(404).json({ message: "Article not found" });
+    } else {
+      // Success, respond with the article
+      return res.json(articleFound);
+    }
+  });
 };
 
 // Admin only
