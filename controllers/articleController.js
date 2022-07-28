@@ -149,7 +149,7 @@ exports.article_put = function (req, res, next) {
               return next(update_errors);
             }
 
-            res.json({ message: "Successfully updated the article" });
+            return res.json({ message: "Successfully updated the article" });
           }
         );
       }
@@ -333,7 +333,60 @@ exports.comment_get = function (req, res, next) {
 // Admin only
 exports.comment_put = function (req, res, next) {
   // Updates the specified comment on the specified article with a new one
-  res.json({ message: "NOT IMPLEMENTED: comment id PUT" });
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({
+        message: "Bad auth: Admin only",
+        user,
+      });
+    }
+
+    // Admin authenticated: proceed to update the article
+    Article.findOne({ _id: req.params.articleId }).exec((err, articleFound) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!articleFound) {
+        // Article doesn't exist, report error to user
+        return res.status(404).json({ message: "Article not found" });
+      } else {
+        // Article found, now look for the comment:
+        Comment.findOne({ _id: req.params.commentId }).exec(
+          (err, commentFound) => {
+            if (err) {
+              return next(err);
+            }
+
+            if (!commentFound) {
+              // comment doesn't exist, report error to user
+              return res.status(404).json({ message: "Comment not found" });
+            } else {
+              // success, update the comment with the one in the request body:
+              const newComment = new Comment({
+                _id: req.params.commentId,
+                name: req.body.name,
+                content: req.body.content,
+              });
+
+              Comment.findByIdAndUpdate(
+                req.params.commentId,
+                newComment,
+                {},
+                (err) => {
+                  if (err) {
+                    return next(err);
+                  }
+                }
+              );
+
+              return res.json({ message: "Successfully updated the comment" });
+            }
+          }
+        );
+      }
+    });
+  })(req, res);
 };
 // Admin only
 exports.comment_delete = function (req, res, next) {
