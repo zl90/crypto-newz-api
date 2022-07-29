@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 require("./passport");
 const LocalStrategy = require("passport-local").Strategy;
 const bodyParser = require("body-parser");
+const sourceController = require("./controllers/sourceController");
 
 var indexRouter = require("./routes/index");
 var articlesRouter = require("./routes/articles");
