@@ -24,7 +24,7 @@ const getNews = () => {
             const newArticle = new Article({
               title: element.title,
               published_at: Date.parse(element.published_at),
-              url: element.url,
+              url: `https://cryptopanic.com/news/${element.id.toString()}/click/`,
               source: element.source.domain,
               comments: [],
             });
