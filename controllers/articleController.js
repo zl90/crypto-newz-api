@@ -3,6 +3,7 @@ const Article = require("../models/article");
 const Comment = require("../models/comment");
 const passport = require("passport");
 const article = require("../models/article");
+const { validationResult, body } = require("express-validator");
 
 //////////////////// Article List (all articles) //////////////////////////////
 // Public
@@ -211,44 +212,68 @@ exports.comments_get = function (req, res, next) {
     });
 };
 // Public
-exports.comments_post = function (req, res, next) {
-  // Adds a new comment to the specified article
-  Article.findOne({ _id: req.params.articleId })
-    .populate("comments")
-    .exec((err, articleFound) => {
-      if (err) {
-        return next(err);
-      }
+// Adds a new comment to the specified article
+exports.comments_post = [
+  body("name")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Must enter a Name")
+    .blacklist("\\<\\>\\/")
+    .isLength({ min: 1, max: 50 })
+    .withMessage("Name must be between 1 and 50 characters"),
+  body("content")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Must enter a Comment")
+    .blacklist("\\<\\>\\/")
+    .isLength({ min: 1, max: 1000 })
+    .withMessage("Comment must be between 1 and 1000 characters"),
+  function (req, res, next) {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      // There are validation errors, notify the user
+      return res.status(400).json({ errors: validationErrors.array() });
+    }
 
-      if (!articleFound) {
-        // Article doesn't exist, report error to user
-        return res.status(404).json({ message: "Article not found" });
-      } else {
-        // Article found, create the new comment object:
-        const newComment = new Comment({
-          name: req.body.name,
-          content: req.body.content,
-        });
+    Article.findOne({ _id: req.params.articleId })
+      .populate("comments")
+      .exec((err, articleFound) => {
+        if (err) {
+          return next(err);
+        }
 
-        // save the new comment to the db
-        newComment.save((err) => {
-          if (err) {
-            return next(err);
-          }
-        });
+        if (!articleFound) {
+          // Article doesn't exist, report error to user
+          return res.status(404).json({ message: "Article not found" });
+        } else {
+          // Article found, create the new comment object:
+          const newComment = new Comment({
+            name: req.body.name,
+            content: req.body.content,
+          });
 
-        // Append the new comment to the article
-        articleFound.comments.push(newComment);
-        articleFound.save((err) => {
-          if (err) {
-            return next(err);
-          }
-        });
+          // save the new comment to the db
+          newComment.save((err) => {
+            if (err) {
+              return next(err);
+            }
+          });
 
-        res.json({ message: "Successfully added new comment" });
-      }
-    });
-};
+          // Append the new comment to the article
+          articleFound.comments.push(newComment);
+          articleFound.save((err) => {
+            if (err) {
+              return next(err);
+            }
+          });
+
+          res.json({ message: "Successfully added new comment" });
+        }
+      });
+  },
+];
 // Admin only
 exports.comments_delete = function (req, res, next) {
   // Deletes all comments on the specified article
