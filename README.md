@@ -17,7 +17,7 @@ GET individual article (append article ID): [https://agile-coast-67507.herokuapp
 
 GET all comments (on individual article): [https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments](https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments)
 
-GET individual comment (append comment ID): [https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments/62e4d10422be03020e31e53a](https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments/62e4d10422be03020e31e53a)
+GET individual comment (append comment ID): [https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments/62e4d6e822be03020e31e94c](https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments/62e4d6e822be03020e31e94c)
 
 POST new comment (on individual article): [https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments](https://agile-coast-67507.herokuapp.com/articles/62e4c48c9c26556fa1845043/comments) --> Requires the HTTP Body to be populated with the Comment in JSON form as follows:
 ```json
