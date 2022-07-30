@@ -12,12 +12,11 @@ const getNews = () => {
   cryptopanic.getLatestArticles
     .then((results) => {
       // save to the db without duplicates
-      const articles = [];
       results.map((element, index) => {
         // look for duplicate articles
         Article.findOne({ title: element.title }).exec((err, articleFound) => {
           if (err) {
-            console.log(err);
+            return console.log(err);
           }
 
           if (!articleFound) {
@@ -31,10 +30,10 @@ const getNews = () => {
             });
             newArticle.save((err) => {
               if (err) {
-                console.log(err);
+                return console.log(err);
               }
+              console.log(`New article saved: "${element.title}"`);
             });
-            console.log(`New article saved: "${element.title}"`);
           }
         });
       });

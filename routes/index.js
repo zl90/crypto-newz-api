@@ -4,7 +4,10 @@ const userController = require("../controllers/userController");
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  res.render("index", { title: "Express" });
+  res.json({
+    message: "Welcome to the CryptoNewz API!",
+    url: "https://github.com/zl90/crypto-newz-api",
+  });
 });
 
 // Only a POST request is needed for login/signup in this project
