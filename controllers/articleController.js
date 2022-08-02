@@ -252,6 +252,7 @@ exports.comments_post = [
           const newComment = new Comment({
             name: req.body.name,
             content: req.body.content,
+            published_at: Date.now(),
           });
 
           // save the new comment to the db
@@ -392,6 +393,7 @@ exports.comment_put = function (req, res, next) {
                 _id: req.params.commentId,
                 name: req.body.name,
                 content: req.body.content,
+                published_at: commentFound.published_at,
               });
 
               Comment.findByIdAndUpdate(
